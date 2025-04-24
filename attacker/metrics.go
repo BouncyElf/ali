@@ -54,6 +54,8 @@ type LatencyMetrics struct {
 	P95 time.Duration `json:"95th"`
 	// P99 is the 99th percentile request latency.
 	P99 time.Duration `json:"99th"`
+	// P999 is the 999th percentile request latency.
+	P999 time.Duration `json:"999th"`
 	// Max is the maximum observed request latency.
 	Max time.Duration `json:"max"`
 	// Min is the minimum observed request latency.
@@ -82,6 +84,7 @@ func newMetrics(m *vegeta.Metrics) *Metrics {
 			P90:   m.Latencies.Quantile(0.90),
 			P95:   m.Latencies.Quantile(0.95),
 			P99:   m.Latencies.Quantile(0.99),
+			P999:  m.Latencies.Quantile(0.999),
 			Max:   m.Latencies.Max,
 			Min:   m.Latencies.Min,
 		},

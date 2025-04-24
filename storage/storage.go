@@ -14,6 +14,7 @@ const (
 	P90MetricName     = "p90"
 	P95MetricName     = "p95"
 	P99MetricName     = "p99"
+	P999MetricName    = "p999"
 )
 
 // Storage provides goroutine safe capabilities of insertion into and retrieval from the time-series storage.
@@ -40,6 +41,7 @@ type Result struct {
 	P90       time.Duration
 	P95       time.Duration
 	P99       time.Duration
+	P999      time.Duration
 }
 
 func NewStorage(partitionDuration time.Duration) (Storage, error) {
@@ -105,6 +107,13 @@ func (s *storage) Insert(result *Result) error {
 			DataPoint: tstorage.DataPoint{
 				Timestamp: timestamp,
 				Value:     float64(result.P99.Milliseconds()),
+			},
+		},
+		{
+			Metric: P999MetricName,
+			DataPoint: tstorage.DataPoint{
+				Timestamp: timestamp,
+				Value:     float64(result.P999.Milliseconds()),
 			},
 		},
 	}

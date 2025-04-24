@@ -92,6 +92,14 @@ L:
 			d.widgets.percentilesChart.Series("p99", p99,
 				linechart.SeriesCellOpts(d.widgets.p99Legend.cellOpts...),
 			)
+
+			p999, err := d.storage.Select(storage.P999MetricName, start, end)
+			if err != nil {
+				log.Printf("failed to select p999 data points: %v\n", err)
+			}
+			d.widgets.percentilesChart.Series("p999", p999,
+				linechart.SeriesCellOpts(d.widgets.p999Legend.cellOpts...),
+			)
 		}
 	}
 	d.chartDrawing.Store(false)
@@ -128,6 +136,7 @@ P50: %v
 P90: %v
 P95: %v
 P99: %v
+P999: %v
 Max: %v
 Min: %v`
 
@@ -171,6 +180,7 @@ func (d *drawer) redrawMetrics(ctx context.Context) {
 					m.Latencies.P90,
 					m.Latencies.P95,
 					m.Latencies.P99,
+					m.Latencies.P999,
 					m.Latencies.Max,
 					m.Latencies.Min,
 				), text.WriteReplace())

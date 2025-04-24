@@ -5,10 +5,12 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"fmt"
+	"io"
 	"log"
 	"math"
 	"net"
 	"net/http"
+	"os"
 	"time"
 
 	vegeta "github.com/tsenart/vegeta/v12/lib"
@@ -34,6 +36,7 @@ type Options struct {
 	Rate        int
 	Duration    time.Duration
 	Timeout     time.Duration
+	Targets     string
 	Method      string
 	Body        []byte
 	MaxBody     int64
@@ -118,10 +121,21 @@ func NewAttacker(storage storage.Writer, target string, opts *Options) (Attacker
 			vegeta.TLSConfig(tlsConfig),
 		)
 	}
+
+	var targets io.Reader
+	if opts.Targets != "" {
+		f, err := os.Open(opts.Targets)
+		if err != nil {
+			return nil, fmt.Errorf("unable to open targets: %v", err)
+		}
+		targets = f
+	}
+
 	return &attacker{
 		target:             target,
 		rate:               opts.Rate,
 		duration:           opts.Duration,
+		targets:            targets,
 		timeout:            opts.Timeout,
 		method:             opts.Method,
 		body:               opts.Body,
@@ -153,6 +167,7 @@ type attacker struct {
 	rate               int
 	duration           time.Duration
 	timeout            time.Duration
+	targets            io.Reader
 	method             string
 	body               []byte
 	maxBody            int64
@@ -181,6 +196,19 @@ func (a *attacker) Attack(ctx context.Context, metricsCh chan *Metrics) {
 		Body:   a.body,
 		Header: a.header,
 	})
+	if a.targets != nil {
+		targeter = vegeta.NewHTTPTargeter(a.targets, a.body, a.header)
+		ts := make([]vegeta.Target, 0, 10000)
+		var tg vegeta.Target
+		for err := targeter(&tg); err == nil; {
+			tg = vegeta.Target{}
+			ts = append(ts, tg)
+		}
+		if len(ts) == 0 {
+			panic("invalid http targets")
+		}
+		targeter = vegeta.NewStaticTargeter(ts...)
+	}
 
 	metrics := &vegeta.Metrics{}
 	if len(a.buckets) > 0 {

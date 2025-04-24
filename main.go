@@ -41,6 +41,7 @@ type cli struct {
 	rate               int
 	duration           time.Duration
 	timeout            time.Duration
+	targets            string
 	method             string
 	headers            []string
 	body               string
@@ -85,6 +86,7 @@ func parseFlags(stdout, stderr io.Writer) (*cli, error) {
 	flagSet.IntVarP(&c.rate, "rate", "r", attacker.DefaultRate, "The request rate per second to issue against the targets. Give 0 then it will send requests as fast as possible.")
 	flagSet.DurationVarP(&c.duration, "duration", "d", attacker.DefaultDuration, "The amount of time to issue requests to the targets. Give 0s for an infinite attack.")
 	flagSet.DurationVarP(&c.timeout, "timeout", "t", attacker.DefaultTimeout, "The timeout for each request. 0s means to disable timeouts.")
+	flagSet.StringVarP(&c.targets, "targets", "", "", "Targets file (default \"stdin\").")
 	flagSet.StringVarP(&c.method, "method", "m", attacker.DefaultMethod, "An HTTP request method for each request.")
 	flagSet.StringArrayVarP(&c.headers, "header", "H", []string{}, "A request header to be sent. Can be used multiple times to send multiple headers.")
 	flagSet.StringVarP(&c.body, "body", "b", "", "A request body to be sent.")
@@ -123,10 +125,12 @@ func (c *cli) run(args []string) int {
 		return 0
 	}
 	if len(args) == 0 {
+		// TODO: check if targets file given
 		fmt.Fprintln(c.stderr, "no target given")
 		c.usage()
 		return 1
 	}
+	// TODO: the priority should be targets over target, although we should returns an error when both presented
 	target := args[0]
 	if _, err := url.ParseRequestURI(target); err != nil {
 		fmt.Fprintf(c.stderr, "bad target URL: %v\n", err)
@@ -257,6 +261,7 @@ func (c *cli) makeAttackerOptions() (*attacker.Options, error) {
 		Rate:               c.rate,
 		Duration:           c.duration,
 		Timeout:            c.timeout,
+		Targets:            c.targets,
 		Method:             c.method,
 		Body:               body,
 		MaxBody:            c.maxBody,

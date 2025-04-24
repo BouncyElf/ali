@@ -43,6 +43,7 @@ type widgets struct {
 	othersText      Text
 
 	percentilesChart LineChart
+	p999Legend       chartLegend
 	p99Legend        chartLegend
 	p95Legend        chartLegend
 	p90Legend        chartLegend
@@ -80,6 +81,11 @@ func newWidgets(targetURL string, rate int, duration time.Duration, method strin
 		return nil, err
 	}
 
+	p999Color := cell.FgColor(cell.ColorNumber(100))
+	p999Text, err := newText("p999", text.WriteCellOpts(p999Color))
+	if err != nil {
+		return nil, err
+	}
 	p99Color := cell.FgColor(cell.ColorNumber(87))
 	p99Text, err := newText("p99", text.WriteCellOpts(p99Color))
 	if err != nil {
@@ -128,6 +134,7 @@ func newWidgets(targetURL string, rate int, duration time.Duration, method strin
 		othersText:       othersText,
 		progressGauge:    progressGauge,
 		percentilesChart: percentilesChart,
+		p999Legend:       chartLegend{p999Text, []cell.Option{p999Color}},
 		p99Legend:        chartLegend{p99Text, []cell.Option{p99Color}},
 		p95Legend:        chartLegend{p95Text, []cell.Option{p95Color}},
 		p90Legend:        chartLegend{p90Text, []cell.Option{p90Color}},
