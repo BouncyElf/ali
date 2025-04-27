@@ -115,6 +115,7 @@ func TestUpdateMetrics(t *testing.T) {
 					P90:   1,
 					P95:   1,
 					P99:   1,
+					P999:  1,
 					Max:   1,
 					Min:   1,
 				},
@@ -146,6 +147,7 @@ P50: 1ns
 P90: 1ns
 P95: 1ns
 P99: 1ns
+P999: 1ns
 Max: 1ns
 Min: 1ns`, gomock.Any()).AnyTimes()
 				return t

@@ -6,7 +6,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"log"
 	"net"
 	"net/http"
@@ -217,7 +216,7 @@ func (c *cli) makeAttackerOptions() (*attacker.Options, error) {
 
 	body := []byte(c.body)
 	if c.bodyFile != "" {
-		b, err := ioutil.ReadFile(c.bodyFile)
+		b, err := os.ReadFile(c.bodyFile)
 		if err != nil {
 			return nil, fmt.Errorf("unable to open %q: %w", c.bodyFile, err)
 		}
@@ -250,7 +249,7 @@ func (c *cli) makeAttackerOptions() (*attacker.Options, error) {
 	var caCertPool *x509.CertPool
 	if c.caCert != "" {
 		caCertPool = x509.NewCertPool()
-		caCert, err := ioutil.ReadFile(c.caCert)
+		caCert, err := os.ReadFile(c.caCert)
 		if err != nil {
 			log.Fatal(err)
 		}
